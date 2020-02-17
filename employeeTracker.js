@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-
+const cTable = require("console.table");
 let connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -66,5 +66,22 @@ function startTracker(){
                 updateEmployeeManager();
             break;
         }
+    });
+}
+function viewEmployee(){
+    let query = "SELECT id, first_name, last_name, role_id, manager_id FROM Employee";
+    connection.query(query, function(err, res){
+        for(let i = 0; i < res.length; i++){
+            console.table([
+                {
+                    ID: res[i].id,
+                    First_Name:   res[i].first_name,
+                    Last_Name:   res[i].last_name,
+                    Role_ID:   res[i].role_id,
+                    Manager_ID:  res[i].manager_id
+                }
+            ])
+        }
+        startTracker();
     });
 }
