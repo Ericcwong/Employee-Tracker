@@ -1,9 +1,9 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 
-var connection = mysql.createConnection({
+let connection = mysql.createConnection({
     host: "localhost",
-    port: 8000,
+    port: 3306,
     //Your Username
     user:"root",
     //Enter your password
@@ -13,5 +13,58 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err){
     if (err) throw err;
-    
+    startTracker();
 });
+
+function startTracker(){
+    inquirer
+    .prompt({
+        name: "initial",
+        type: "rawlist",
+        message: "What would you like to do?",
+        choices: [
+            "View all Employee",
+            "View all Employee by Department",
+            "View all Employee by Manager",
+            "Add Employee",
+            "Remove Employee",
+            "Update Employee",
+            "Updated Employee Role",
+            "Update Employee Manager"
+        ]
+    }).then(function(choice){
+        switch (choice.initial){
+            case "View all Employee": 
+                viewEmployee();
+            break;
+
+            case "View all Employee by Department":
+                viewDepartment();
+            break;
+
+            case "View all Employee by Manager":
+                viewManager();
+            break;
+
+            case "Add Employee":
+                addEmployee();
+            break;
+
+            case "Remove Employee":
+                removeEmployee();
+            break;
+
+            case "Update Employee":
+                updateEmployee();
+            break;
+
+            case "Update Employee Role":
+                updateEmployeeRole();
+            break;
+
+            case "Update Employee Manager":
+                updateEmployeeManager();
+            break;
+        }
+    });
+}
