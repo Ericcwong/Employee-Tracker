@@ -20,7 +20,7 @@ function startTracker(){
     inquirer
     .prompt({
         name: "initial",
-        type: "rawlist",
+        type: "list",
         message: "What would you like to do?",
         choices: [
             "View all Employee",
@@ -69,16 +69,20 @@ function startTracker(){
     });
 }
 function viewEmployee(){
-    let query = "SELECT id, first_name, last_name, role_id, manager_id FROM Employee";
+    let query = "SELECT * ";
+    query += "FROM Employee as EM INNER JOIN Role as RL ON EM.role_id = RL.role_id ";
+    query += "INNER JOIN ";
     connection.query(query, function(err, res){
         for(let i = 0; i < res.length; i++){
             console.table([
                 {
-                    ID: res[i].id,
-                    First_Name:   res[i].first_name,
-                    Last_Name:   res[i].last_name,
-                    Role_ID:   res[i].role_id,
-                    Manager_ID:  res[i].manager_id
+                    Employee_ID: res[i].employee_id,
+                    First_Name: res[i].first_name,
+                    Last_Name: res[i].last_name,
+                    Role_ID: res[i].role_id,
+                    Manager_ID: res[i].manager_id,
+                    Title: res[i].title,
+                    Salary: res[i].salary
                 }
             ])
         }
