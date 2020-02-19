@@ -97,7 +97,7 @@ function viewEmployee(){
 function viewDepartment(){
     let query = "SELECT * FROM Department"
     connection.query(query,function(err, res){
-
+        if (err) throw err;
    //Displays the department options
         inquirer.prompt({
             name: "viewDep",
@@ -143,18 +143,47 @@ function viewManager(){
         //selects all, it is displaying in order by the console.table
         let query = "SELECT Manager.manager_id, Manager.manager_name FROM Manager";
         connection.query(query, function(err, res){
-            for(let i = 0; i < res.length; i++){
-                console.table([
-                    {
-                        Manager_ID: res[i].manager_id,
-                        Manager_Name: res[i].manager_name
+        if (err) throw err;
+            inquirer.prompt({
+                name: "viewMg",
+                type: "rawlist",
+                message: "Here are the Managers",
+                choices: function(){
+                    let managerArray = [];
+                    for (let i = 0; i < res.length; i++){
+                        managerArray.push(res[i].manager_name);
                     }
-                ])
-            }
-            startTracker();
+                    return managerArray;
+                }
+            }).then(function(choices){
+                console.log(choices);
+            // With the option chosen, It should spit out the choice that was made
+                let query = "SELECT MG.manager_name, EM.employee_id, EM.first_name, EM.last_name, RL.title, DP.department_name, RL.salary ";
+                query += "FROM Employee as EM INNER JOIN Role as RL ON EM.role_id = RL.role_id ";
+                query += "INNER JOIN Department as DP ON RL.department_id = DP.department_id ";
+                query += "INNER JOIN Manager as MG ON MG.manager_id = EM.manager_id "
+                query += "WHERE MG.manager_name = ?"
+                connection.query(query, [choices.viewMg], function(err, res){
+                    console.log(choices.viewMg);
+                    for(let i = 0; i < res.length; i++){
+                        console.table([
+                            {   
+                                Manager_name: res[i].manager_name,
+                                Employee_ID: res[i].employee_id,
+                                First_Name: res[i].first_name,
+                                Last_Name: res[i].last_name,
+                                Title: res[i].title,
+                                Department: res[i].department_name,
+                                Salary: res[i].salary
+                            }
+                        ])
+                    }
+                    startTracker();
+                });
+            });
         });
 }
 function addEmployee(){
-    
+
 
 }
