@@ -26,6 +26,9 @@ function startTracker(){
             "View all Employee",
             "View all Employee by Department",
             "View all Employee by Manager",
+            "View all Managers",
+            "View all Departments",
+            "View all Roles",
             "Add Employee",
             "Remove Employee",
             "Update Employee",
@@ -39,11 +42,22 @@ function startTracker(){
             break;
 
             case "View all Employee by Department":
-                viewDepartment();
+                viewEmployeeDepartment();
             break;
 
             case "View all Employee by Manager":
+                viewEmployeeManager();
+            break;
+            case "View all Managers":
                 viewManager();
+            break;
+
+            case "View all Departments":
+                viewDepartment();
+            break;
+
+            case "View all Roles":
+                viewRole();
             break;
 
             case "Add Employee":
@@ -93,8 +107,8 @@ function viewEmployee(){
         startTracker();
     });
 }
-//Viewing only the department
-function viewDepartment(){
+//Viewing Employees by Department
+function viewEmployeeDepartment(){
     let query = "SELECT * FROM Department"
     connection.query(query,function(err, res){
         if (err) throw err;
@@ -138,8 +152,8 @@ function viewDepartment(){
         });
     });
 }
-
-function viewManager(){
+//Viewing employees by manager
+function viewEmployeeManager(){
         //selects all, it is displaying in order by the console.table
         let query = "SELECT Manager.manager_id, Manager.manager_name FROM Manager";
         connection.query(query, function(err, res){
@@ -183,7 +197,58 @@ function viewManager(){
             });
         });
 }
-function addEmployee(){
+//Views all Managers
+function viewManager(){
+    let query = "SELECT Manager.manager_id, Manager.manager_name FROM Manager";
+    connection.query(query, function(err, res){
+    if (err) throw err;
 
+        for(let i = 0; i < res.length; i++){
+            console.table([
+                {
+                    Manager_ID: res[i].manager_id,
+                    Manager_name: res[i].manager_name
+                }
+            ]);
+        }
+        startTracker();
+    });
+}
+//Views all Departments
+function viewDepartment(){
+    let query = "SELECT Department.department_id, Department.department_name FROM Department";
+    connection.query(query, function(err, res){
+    if (err) throw err;
+
+        for(let i = 0; i < res.length; i++){
+            console.table([
+                {
+                    Department_ID: res[i].department_id,
+                    Department_name: res[i].department_name
+                }
+            ]);
+        }
+        startTracker();
+    });
+}
+//View roles
+function viewRole(){
+    let query = "SELECT Role.role_id, Role.title, Role.salary FROM Role";
+    connection.query(query, function(err, res){
+    if (err) throw err;
+
+        for(let i = 0; i < res.length; i++){
+            console.table([
+                {
+                    Role_ID: res[i].role_id,
+                    Title: res[i].title,
+                    Salary: res[i].salary
+                }
+            ]);
+        }
+        startTracker();
+    });
+}
+function addEmployee(){
 
 }
