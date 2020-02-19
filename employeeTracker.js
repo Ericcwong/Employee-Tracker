@@ -139,3 +139,22 @@ function viewDepartment(){
     });
 }
 
+function viewManager(){
+        //selects all, it is displaying in order by the console.table
+        let query = "SELECT Manager.manager_id, Manager.manager_name FROM Manager";
+        connection.query(query, function(err, res){
+            for(let i = 0; i < res.length; i++){
+                console.table([
+                    {
+                        Manager_ID: res[i].manager_id,
+                        Manager_Name: res[i].manager_name
+                    }
+                ])
+            }
+            startTracker();
+        });
+}
+function addEmployee(){
+    
+
+}
