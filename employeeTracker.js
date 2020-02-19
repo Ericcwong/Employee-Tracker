@@ -71,8 +71,7 @@ function startTracker(){
 //Displays the employee cards
 function viewEmployee(){
     //selects all, it is displaying in order by the console.table
-    // Ask about why this doesnt work (Employee.employee_id, Employee.first_name, Employee.last_name, Role.title, Department.name, Role.salary, Employee.manager_id)
-    let query = "SELECT * ";
+    let query = "SELECT EM.employee_id, EM.first_name, EM.last_name, RL.title, DP.name, RL.salary, EM.manager_id ";
     query += "FROM Employee as EM INNER JOIN Role as RL ON EM.role_id = RL.role_id ";
     query += "INNER JOIN Department as DP ON RL.department_id = DP.department_id";
     connection.query(query, function(err, res){
@@ -113,19 +112,23 @@ function viewDepartment(){
         }).then(function(choices){
             console.log(choices);
         // With the option chosen, It should spit out the choice that was made
-            let query = "SELECT * ";
+            let query = "SELECT EM.employee_id, EM.first_name, EM.last_name, RL.title, DP.name, RL.salary, EM.manager_id ";
             query += "FROM Employee as EM INNER JOIN Role as RL ON EM.role_id = RL.role_id ";
             query += "INNER JOIN Department as DP ON RL.department_id = DP.department_id ";
             query += "WHERE DP.name = ?"
-            connection.query(query, [ choices.name ], function(err, res){
-                console.log(choices.name);
+            connection.query(query, [choices.viewDep], function(err, res){
+                console.log(choices.viewDep);
                 for(let i = 0; i < res.length; i++){
                     console.table([
                         {
                             Employee_ID: res[i].employee_id,
                             First_Name: res[i].first_name,
                             Last_Name: res[i].last_name,
+                            Title: res[i].title,
                             Department: res[i].name,
+                            Salary: res[i].salary,
+                            //Manager id needs a manager table
+                            Manager_ID: res[i].manager_id
                         }
                     ])
                 }
