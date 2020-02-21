@@ -272,7 +272,7 @@ function addEmployee() {
   });
 }
 function removeEmployee() {
-  let query = "SELECT CONCAT_WS(' ', first_name, last_name) AS fullname FROM Employee ";
+  let query = "SELECT employee_id, first_name, last_name FROM Employee ";
   connection.query(query, function(err, res) {
     if (err) throw err;
     inquirer
@@ -283,14 +283,15 @@ function removeEmployee() {
         choices: function() {
           let employeeArray = [];
           for (let i = 0; i < res.length; i++) {
-            employeeArray.push(res[i].fullname);
+            employeeArray.push(res[i].employee_id);
+            employeeArray.push(res[i].first_name + " " + res[i].last_name);
           }
           return employeeArray;
         }
       })
       .then(function(choice) {
         console.log(choice.employee);
-        let deleteQuery = "DELETE FROM Employee WHERE first_name = ?";
+        let deleteQuery = "DELETE FROM Employee WHERE employee_id = ?";
         connection.query(deleteQuery, [choice.employee], function(err) {
           if (err) throw err;
           console.log("Removed Employee.");
