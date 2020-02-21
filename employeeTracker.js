@@ -31,8 +31,7 @@ function startTracker() {
         "View all Roles",
         "Add Employee",
         "Remove Employee",
-        "Update Employee",
-        "Updated Employee Role",
+        "Update Employee Role",
         "Update Employee Manager"
       ]
     })
@@ -67,10 +66,6 @@ function startTracker() {
 
         case "Remove Employee":
           removeEmployee();
-          break;
-
-        case "Update Employee":
-          updateEmployee();
           break;
 
         case "Update Employee Role":
@@ -249,49 +244,107 @@ function addEmployee() {
           console.log(choices);
           // With the option chosen, It should spit out the choice that was made
           let emQuery = "INSERT INTO Employee SET ?";
-          let rlQuery = "INSERT INTO Role SET ?"
-          let mgQuery = "INSERT INTO Manager SET ?"
-          connection.query(emQuery, {first_name: choices.first_name, last_name: choices.last_name}, function(err) {
-            connection.query(rlQuery, {title: choices.roles}, function(err){
-            connection.query(mgQuery, {manager_name: choices.manager}, function(err,res){
-              if(err) throw err;
-            console.log(choices.first_name);
-            console.log(choices.manager);
-            console.table(res);
-            startTracker();
-          });
-        });
-    });
+          let rlQuery = "INSERT INTO Role SET ?";
+          let mgQuery = "INSERT INTO Manager SET ?";
+          connection.query(
+            emQuery,
+            { first_name: choices.first_name, last_name: choices.last_name },
+            function(err) {
+              connection.query(rlQuery, { title: choices.roles }, function(
+                err
+              ) {
+                connection.query(
+                  mgQuery,
+                  { manager_name: choices.manager },
+                  function(err, res) {
+                    if (err) throw err;
+                    console.log(choices.first_name);
+                    console.log(choices.manager);
+                    console.table(res);
+                    startTracker();
+                  }
+                );
+              });
+            }
+          );
         });
     });
   });
 }
-function removeEmployee(){
-    let query = "SELECT * FROM Employee";
-    connection.query(query,function(err,res){
-    if(err) throw err;
+function removeEmployee() {
+  let query = "SELECT * FROM Employee ";
+  connection.query(query, function(err, res) {
+    if (err) throw err;
     inquirer
-        .prompt(
-            {
-                name: "employee",
-                type: "list",
-                message: "Which Employee do you want to remove?",
-                choices: function() {
-                  let employeeArray = [];
-                  for (let i = 0; i < res.length; i++) {
-                    employeeArray.push(res[i].first_name);
-                  }
-                  return employeeArray;
-                }
+      .prompt({
+        name: "employee",
+        type: "list",
+        message: "Which Employee do you want to remove?",
+        choices: function() {
+          let employeeArray = [];
+          for (let i = 0; i < res.length; i++) {
+            employeeArray.push(res[i].first_name);
+          }
+          return employeeArray;
+        }
+      })
+      .then(function(choice) {
+        console.log(choice.employee);
+        let deleteQuery = "DELETE FROM Employee WHERE first_name = ?";
+        connection.query(deleteQuery, [choice.employee], function(err) {
+          if (err) throw err;
+          console.log("Removed Employee.");
+          startTracker();
+        });
+      });
+  });
+}
+function updateEmployeeRole() {
+  let employeeQuery = "SELECT * FROM Employee";
+  let roleQuery = "SELECT * FROM Role";
+  connection.query(employeeQuery, function(err, emRes) {
+    if (err) throw err;
+    connection.query(roleQuery, function(err, rlRes) {
+      if (err) throw err;
+      inquirer
+        .prompt([
+          {
+            name: "employee",
+            type: "list",
+            message: "Choose the Employee you want to update.",
+            choices: function() {
+              let employeeArray = [];
+              for (let i = 0; i < emRes.length; i++) {
+                employeeArray.push(emRes[i].first_name);
+              }
+              return employeeArray;
             }
-        ).then(function (choice){
-            console.log(choice);
-            let deleteQuery = "DELETE FROM Employee WHERE first_name = ?"
-            connection.query(deleteQuery, [choice.employee], function(err){
-                if(err) throw err;
-                console.log("Removed Employee.")
-                startTracker();
-            })
+          },
+          {
+            name: "role",
+            type: "list",
+            message: "Choose the new Role.",
+            choices: function() {
+              let roleArray = [];
+              for (let i = 0; i < rlRes.length; i++) {
+                roleArray.push(rlRes[i].title);
+              }
+              return roleArray;
+            }
+          }
+        ])
+        .then(function(choice) {
+          let updateQuery = "UPDATE Employee SET role_id ? WHERE first_name ? ";
+          updateQuery += "INNER JOIN Role ON Employee.role_id = Role.role_id";
+          connection.query(
+            updateQuery,
+            [choice.role, choice.employee],
+            function(err) {
+              if (err) throw err;
+            }
+          );
+          
         });
     });
+  });
 }
