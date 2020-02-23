@@ -88,6 +88,7 @@ function viewEmployee() {
   query += "LEFT JOIN Department as DP ON RL.department_id = DP.department_id ";
   query += "LEFT JOIN Manager as MG ON EM.manager_id = MG.manager_id";
   connection.query(query, function(err, res) {
+    console.log(res);
     console.table(res);
     startTracker();
   });
@@ -197,8 +198,8 @@ function viewRole() {
 }
 //Adding employees
 function addEmployee() {
-  let query = "SELECT Role.title FROM Role ";
-  let mgQuery = "SELECT Manager.manager_name FROM Manager";
+  let query = "SELECT * FROM Role ";
+  let mgQuery = "SELECT * FROM Manager";
   connection.query(query, function(err, res) {
     if (err) throw err;
     connection.query(mgQuery, function(mgErr, mgRes) {
@@ -220,9 +221,10 @@ function addEmployee() {
             type: "list",
             message: "What is their Role?",
             choices: function() {
+              // console.log(res);
               let roleArray = [];
               for (let i = 0; i < res.length; i++) {
-                roleArray.push(res[i].title);
+                roleArray.push(`${res[i].role_id}: ${res[i].title}`);
               }
               return roleArray;
             }
@@ -232,39 +234,34 @@ function addEmployee() {
             type: "list",
             message: "Who is their Manager?",
             choices: function() {
+              // console.log(mgRes);
               let managerArray = [];
               for (let i = 0; i < mgRes.length; i++) {
-                managerArray.push(mgRes[i].manager_name || "Default");
+                managerArray.push(`${mgRes[i].manager_id}: ${mgRes[i].manager_name}`);
               }
               return managerArray;
             }
           }
         ])
-        .then(function(choices) {
-          console.log(choices);
+        .then(function({first_name, last_name, roles, manager}) {
           // With the option chosen, It should spit out the choice that was made
-          let emQuery = "INSERT INTO Employee SET ?";
-          let rlQuery = "INSERT INTO Role SET ?";
-          let mgQuery = "INSERT INTO Manager SET ?";
-          connection.query(
-            emQuery,
-            { first_name: choices.first_name, last_name: choices.last_name },
-            function(err) {
-              connection.query(rlQuery, { title: choices.roles }, function(
-                err
-              ) {
-                connection.query(
-                  mgQuery,
-                  { manager_name: choices.manager },
-                  function(err, res) {
+          let roleArray = (roles.split(": "));
+          let managerArray = (manager.split(": "));
+         let query = "INSERT INTO Employee (first_name,last_name,role_id,manager_id) VALUES(?,?,?,?)"
+          connection.query(query,[ first_name, last_name, roleArray[0], managerArray[0] ],function(err) {
+              // connection.query(rlQuery, { title: choices.role }, function(err) {
+                // if(err) throw err;
+                console.log(roles);
+                // connection.query(mgQuery,{ manager_name: choices.manager },function(err, res) {
                     if (err) throw err;
-                    console.log(choices.first_name);
-                    console.log(choices.manager);
+                    console.log(first_name);
+                    console.log(manager);
+                    
                     console.table(res);
                     startTracker();
-                  }
-                );
-              });
+                  // }
+                // );
+              // });
             }
           );
         });
@@ -283,16 +280,17 @@ function removeEmployee() {
         choices: function() {
           let employeeArray = [];
           for (let i = 0; i < res.length; i++) {
-            employeeArray.push(res[i].employee_id);
-            employeeArray.push(res[i].first_name + " " + res[i].last_name);
+            employeeArray.push(`${res[i].employee_id}: ${res[i].first_name} ${res[i].last_name}`);
+            // employeeArray.push(res[i].first_name + " " + res[i].last_name);
           }
+          
           return employeeArray;
         }
       })
       .then(function(choice) {
-        console.log(choice.employee);
-        let deleteQuery = "DELETE FROM Employee WHERE employee_id = ?";
-        connection.query(deleteQuery, [choice.employee], function(err) {
+        let choiceArray = (choice.employee.split(": "));
+        let deleteQuery = "DELETE FROM Employee WHERE employee.employee_id = ?";
+        connection.query(deleteQuery, [choiceArray[0]], function(err) {
           if (err) throw err;
           console.log("Removed Employee.");
           startTracker();
@@ -316,7 +314,7 @@ function updateEmployeeRole() {
             choices: function() {
               let employeeArray = [];
               for (let i = 0; i < emRes.length; i++) {
-                employeeArray.push(emRes[i].first_name);
+                employeeArray.push(`${emRes[i].employee_id}: ${emRes[i].first_name} ${emRes[i].last_name}`);
               }
               return employeeArray;
             }
@@ -328,23 +326,27 @@ function updateEmployeeRole() {
             choices: function() {
               let roleArray = [];
               for (let i = 0; i < rlRes.length; i++) {
-                roleArray.push(rlRes[i].title);
+                roleArray.push(`${rlRes[i].role_id}: ${rlRes[i].title}`);
               }
               return roleArray;
             }
           }
         ])
         .then(function(choice) {
-          let updateQuery = "UPDATE Employee SET role_id ? WHERE first_name ? ";
-          updateQuery += "INNER JOIN Role ON Employee.role_id = Role.role_id";
+          let employeeArray = (choice.employee.split(": "));
+          let roleArray = (choice.role.split(": "));
+          console.log(employeeArray);
+          console.log(roleArray);
+          let updateQuery = "UPDATE Employee SET Employee.role_id = ? WHERE Employee.employee_id = ?  ";
           connection.query(
             updateQuery,
-            [choice.role, choice.employee],
+            [roleArray[0],employeeArray[0]],
             function(err) {
               if (err) throw err;
             }
+            
           );
-          
+          startTracker();
         });
     });
   });
