@@ -88,7 +88,7 @@ function viewEmployee() {
   query += "LEFT JOIN Department as DP ON RL.department_id = DP.department_id ";
   query += "LEFT JOIN Manager as MG ON EM.manager_id = MG.manager_id";
   connection.query(query, function(err, res) {
-    console.log(res);
+    // console.log(res);
     console.table(res);
     startTracker();
   });
